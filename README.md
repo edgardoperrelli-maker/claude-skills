@@ -20,6 +20,7 @@ hook/settings.json      # the settings snippet that registers the hook
 | **ponytail** | Laziest solution that actually works (YAGNI, stdlib first, shortest diff). | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | **caveman** | Ultra-compressed terse output to cut tokens, technical accuracy intact. | [JuliusBrussee/caveman](https://github.com/juliusbrussee/caveman) |
 | **handoff** | Compresses & summarizes the conversation into a paste-ready HANDOFF.md to resume in another chat. | custom (this repo) |
+| **goal** | Long-running goal continuation: give an objective and it auto-advances round by round (via `/loop`) until a completion audit passes. Multi-file; depends on the `/loop` skill. Chinese-language. | [limin112/claude-goal-skill](https://github.com/limin112/claude-goal-skill) |
 
 ## How it works
 
@@ -65,12 +66,14 @@ just append this object as an extra element instead of replacing it:
 
 ## Local setup (once per machine)
 
-Locally `~/.claude/skills` is persistent, so you don't need the hook — just seed it once:
+Locally `~/.claude/skills` is persistent, so you don't need the hook — just seed
+it once. This reads `manifest.txt`, so it handles multi-file skills too:
 
 ```bash
-for s in ponytail caveman handoff; do
-  mkdir -p ~/.claude/skills/$s
-  curl -sSL https://raw.githubusercontent.com/edgardoperrelli-maker/claude-skills/main/skills/$s/SKILL.md -o ~/.claude/skills/$s/SKILL.md
+BASE=https://raw.githubusercontent.com/edgardoperrelli-maker/claude-skills/main
+curl -fsSL "$BASE/manifest.txt" | grep -v '^\s*#' | grep -v '^\s*$' | while read -r rel; do
+  mkdir -p ~/.claude/skills/"$(dirname "$rel")"
+  curl -fsSL --retry 4 --retry-delay 2 "$BASE/skills/$rel" -o ~/.claude/skills/"$rel"
 done
 ```
 
