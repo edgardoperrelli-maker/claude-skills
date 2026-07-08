@@ -19,7 +19,7 @@ hook/settings.json      # the settings snippet that registers the hook
 |-------|--------------|----------|
 | **ponytail** | Laziest solution that actually works (YAGNI, stdlib first, shortest diff). | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | **caveman** | Ultra-compressed terse output to cut tokens, technical accuracy intact. | [JuliusBrussee/caveman](https://github.com/juliusbrussee/caveman) |
-| **handoff** | Writes/updates a HANDOFF.md so the next fresh session can continue. | [ykdojo/claude-code-tips](https://github.com/ykdojo/claude-code-tips) |
+| **handoff** | Compresses & summarizes the conversation into a paste-ready HANDOFF.md to resume in another chat. | custom (this repo) |
 
 ## How it works
 
