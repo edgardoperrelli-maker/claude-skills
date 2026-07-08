@@ -1,0 +1,6 @@
+# Personal Claude Code skills — one file per line, path relative to skills/.
+# Add a line here when you add a new skill; every project with the sync hook
+# picks it up on its next Claude Code on the web session.
+ponytail/SKILL.md
+caveman/SKILL.md
+handoff/SKILL.md
