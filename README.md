@@ -9,7 +9,7 @@ on its next Claude Code on the web session.
 ```
 manifest.txt            # list of skill files to sync (one path per line, relative to skills/)
 skills/<name>/SKILL.md  # the skills themselves
-hook/session-start.sh   # the sync hook to drop into any project
+hook/sync-skills.sh     # the sync hook to drop into any project
 hook/settings.json      # the settings snippet that registers the hook
 ```
 
@@ -26,7 +26,7 @@ hook/settings.json      # the settings snippet that registers the hook
 - **This repo must stay PUBLIC.** The hook fetches files via `raw.githubusercontent.com`
   with no auth (Claude Code on the web blocks the GitHub API and repo tarballs, so raw
   files are the only reliable transport).
-- Each project carries a small **SessionStart hook** (`hook/session-start.sh`). On every
+- Each project carries a small **SessionStart hook** (`hook/sync-skills.sh`). On every
   web session it reads `manifest.txt` from this repo and downloads each listed skill into
   `~/.claude/skills/`, making them available across that session.
 - The hook is a **no-op locally** (`CLAUDE_CODE_REMOTE` guard) and **fails gracefully**
@@ -40,22 +40,24 @@ hook/settings.json      # the settings snippet that registers the hook
 
 ## Wire a new project (cloud)
 
-Copy two files into the project's repo and commit them:
+Copy the hook into the project's repo and register it:
 
 ```bash
 mkdir -p .claude/hooks
-curl -sSL https://raw.githubusercontent.com/edgardoperrelli-maker/claude-skills/main/hook/session-start.sh -o .claude/hooks/session-start.sh
-chmod +x .claude/hooks/session-start.sh
-# then merge hook/settings.json into the project's .claude/settings.json
+curl -sSL https://raw.githubusercontent.com/edgardoperrelli-maker/claude-skills/main/hook/sync-skills.sh -o .claude/hooks/sync-skills.sh
+chmod +x .claude/hooks/sync-skills.sh
 ```
 
-`.claude/settings.json` (create or merge):
+Then add this SessionStart entry to `.claude/settings.json`. The hook is named
+`sync-skills.sh` (not `session-start.sh`) so it never clashes with a project's
+own startup hook — if `.claude/settings.json` already has a `SessionStart` array,
+just append this object as an extra element instead of replacing it:
 
 ```json
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh" } ] }
+      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sync-skills.sh" } ] }
     ]
   }
 }
