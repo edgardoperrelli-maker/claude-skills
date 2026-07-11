@@ -4,6 +4,7 @@
 ponytail/SKILL.md
 caveman/SKILL.md
 handoff/SKILL.md
+grilling/SKILL.md
 goal/SKILL.md
 goal/references/completion-audit.md
 goal/references/examples.md
