@@ -21,17 +21,26 @@ hook/settings.json      # the settings snippet that registers the hook
 | **caveman** | Ultra-compressed terse output to cut tokens, technical accuracy intact. | [JuliusBrussee/caveman](https://github.com/juliusbrussee/caveman) |
 | **handoff** | Compresses & summarizes the conversation into a paste-ready HANDOFF.md to resume in another chat. | custom (this repo) |
 | **goal** | Long-running goal continuation: give an objective and it auto-advances round by round (via `/loop`) until a completion audit passes. Multi-file; depends on the `/loop` skill. Chinese-language. | [limin112/claude-goal-skill](https://github.com/limin112/claude-goal-skill) |
+| **impeccable** | Frontend design language: 23 `/impeccable` commands (craft, shape, audit, critique, polish, animate, …) with per-command references, design detectors, and anti-slop rules. Multi-file (108 files, Apache 2.0). | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
 
 ## How it works
 
-- **This repo must stay PUBLIC.** The hook fetches files via `raw.githubusercontent.com`
-  with no auth (Claude Code on the web blocks the GitHub API and repo tarballs, so raw
-  files are the only reliable transport).
+- **This repo must stay PUBLIC.** The hook fetches it with no auth. Primary transport is
+  one shallow `git clone` of this repo — a single network call for the whole skill set,
+  which matters now that the manifest is 100+ files (impeccable). If the clone fails it
+  falls back to per-file `raw.githubusercontent.com` fetches, parallelized and retried
+  (the GitHub API and repo tarballs are blocked in web sessions, and raw fetches
+  rate-limit with HTTP 429 under bursty access — hence clone first).
 - Each project carries a small **SessionStart hook** (`hook/sync-skills.sh`). On every
-  web session it reads `manifest.txt` from this repo and downloads each listed skill into
-  `~/.claude/skills/`, making them available across that session.
+  web session it reads `manifest.txt` from this repo and copies each listed skill into
+  `~/.claude/skills/`, making them available across that session. Commenting a line out
+  of the manifest stops syncing that file.
 - The hook is a **no-op locally** (`CLAUDE_CODE_REMOTE` guard) and **fails gracefully**
   if this repo is unreachable, so it never blocks a session.
+- **Projects keep their own copy of the hook.** After the hook changes in this repo,
+  re-run the wire snippet below in each project to refresh it. Old copies keep working
+  against the current manifest — they just fetch serially over raw, so session start is
+  slower until re-wired.
 
 ## Add a new skill
 
