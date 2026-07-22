@@ -22,6 +22,7 @@ hook/settings.json      # the settings snippet that registers the hook
 | **handoff** | Compresses & summarizes the conversation into a paste-ready HANDOFF.md to resume in another chat. | custom (this repo) |
 | **goal** | Long-running goal continuation: give an objective and it auto-advances round by round (via `/loop`) until a completion audit passes. Multi-file; depends on the `/loop` skill. Chinese-language. | [limin112/claude-goal-skill](https://github.com/limin112/claude-goal-skill) |
 | **impeccable** | Frontend design language: 23 `/impeccable` commands (craft, shape, audit, critique, polish, animate, …) with per-command references, design detectors, and anti-slop rules. Multi-file (108 files, Apache 2.0). | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
+| **hallmark** | Anti-AI-slop design skill: makes generated UIs look made, not generated. One default design flow plus `audit` / `redesign` / `study` verbs, 20-theme catalog, 21 macrostructures, 58-gate slop test. Multi-file (108 files incl. the 24-theme OKLCH `tokens.css`; MIT). | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
 
 ## How it works
 
