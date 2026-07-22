@@ -1,0 +1,1 @@
+../../hook/sync-skills.sh
