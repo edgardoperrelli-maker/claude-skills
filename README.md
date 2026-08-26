@@ -22,8 +22,22 @@ hook/settings.json      # the settings snippet that registers the hook
 | **handoff** | Compresses & summarizes the conversation into a paste-ready HANDOFF.md to resume in another chat. | custom (this repo) |
 | **grilling** | Interviews you relentlessly about a plan or design, one question at a time, to stress-test it before you build. | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | **goal** | Long-running goal continuation: give an objective and it auto-advances round by round (via `/loop`) until a completion audit passes. Multi-file; depends on the `/loop` skill. Chinese-language. | [limin112/claude-goal-skill](https://github.com/limin112/claude-goal-skill) |
+| **wayfinder** | Multi-session "fog of war" planning: charts work too big for one session as a map of decision tickets on the issue tracker, then resolves them one at a time. User-invoked only (`/wayfinder`). Ships with the three skills it calls (below). | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **domain-modeling** | Actively sharpens a project's domain model: challenges fuzzy terms, keeps `CONTEXT.md` as a pure glossary, writes ADRs sparingly. Wayfinder's default ticket type calls it alongside `grilling`. | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **research** | Delegates reading legwork to a background agent, against primary sources only, and captures the findings as a cited Markdown file. Resolves wayfinder's `research` tickets. | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **prototype** | Builds throwaway code that answers a design question: a single-file HTML state-machine demo, or several switchable UI variations on one route. Resolves wayfinder's `prototype` tickets. | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | **impeccable** | Frontend design language: 23 `/impeccable` commands (craft, shape, audit, critique, polish, animate, …) with per-command references, design detectors, and anti-slop rules. Multi-file (108 files, Apache 2.0). | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
 | **hallmark** | Anti-AI-slop design skill: makes generated UIs look made, not generated. One default design flow plus `audit` / `redesign` / `study` verbs, 20-theme catalog, 21 macrostructures, 58-gate slop test. Multi-file (108 files incl. the 24-theme OKLCH `tokens.css`; MIT). | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
+
+
+`wayfinder` is the one skill here with dependencies: it resolves each ticket type by
+calling the Skill tool for `grilling`, `domain-modeling`, `research` or `prototype`, so
+those travel with it. Two things it expects are deliberately *not* bundled: the map lives
+on the repo's issue tracker, and upstream's `/setup-matt-pocock-skills` (which writes the
+tracker's "Wayfinding operations" doc) is not installed — so wayfinder falls back to the
+local-markdown tracker, whose operations ship as `skills/wayfinder/issue-tracker-local.md`.
+Point it at a real tracker by writing that section yourself and referencing it from the
+project's `CLAUDE.md`.
 
 ## How it works
 

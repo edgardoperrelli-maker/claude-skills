@@ -9,6 +9,24 @@ goal/SKILL.md
 goal/references/completion-audit.md
 goal/references/examples.md
 
+# wayfinder — multi-session "fog of war" planning (mattpocock/skills, MIT). The
+# LICENSE listed here covers all four skills in this block. Wayfinder is
+# user-invoked only (/wayfinder) and resolves its ticket types by calling the
+# Skill tool for grilling (already listed above), domain-modeling, research and
+# prototype — so those three ship alongside it. issue-tracker-local.md is the
+# "Wayfinding operations" doc for the local-markdown tracker wayfinder falls
+# back to when the repo has no issue tracker configured.
+wayfinder/SKILL.md
+wayfinder/LICENSE
+wayfinder/issue-tracker-local.md
+research/SKILL.md
+prototype/SKILL.md
+prototype/LOGIC.md
+prototype/UI.md
+domain-modeling/SKILL.md
+domain-modeling/ADR-FORMAT.md
+domain-modeling/CONTEXT-FORMAT.md
+
 # impeccable — frontend design skill (pbakaus/impeccable, Apache 2.0). Full payload:
 # SKILL.md + per-command references + scripts. Keep every file listed; the skill
 # runs its own scripts (context.mjs, detect.mjs, ...) from its install dir.
