@@ -252,3 +252,15 @@ hallmark/references/themes/lumen.md
 hallmark/references/typography.md
 hallmark/references/verbs/audit.md
 hallmark/references/verbs/redesign.md
+
+# browser-harness — direct Chrome control over CDP (browser-use/browser-harness,
+# MIT). UNLIKE every other skill here, the markdown alone does nothing: it drives
+# the `browser-harness` CLI, a one-time per-machine install that is NOT synced by
+# this hook (see the README). Without it on PATH the skill is inert, which is the
+# expected state in a Claude Code on the web session — there is no real Chrome
+# there to attach to. Upstream generates SKILL.md with `browser-harness skill`,
+# which prints the packaged copy of the repo's root SKILL.md; that copy is what
+# is vendored here, so re-vendor it when you upgrade the CLI.
+browser-harness/SKILL.md
+browser-harness/LICENSE
+browser-harness/references/install.md

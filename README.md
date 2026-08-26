@@ -28,6 +28,7 @@ hook/settings.json      # the settings snippet that registers the hook
 | **prototype** | Builds throwaway code that answers a design question: a single-file HTML state-machine demo, or several switchable UI variations on one route. Resolves wayfinder's `prototype` tickets. | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | **impeccable** | Frontend design language: 23 `/impeccable` commands (craft, shape, audit, critique, polish, animate, …) with per-command references, design detectors, and anti-slop rules. Multi-file (108 files, Apache 2.0). | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
 | **hallmark** | Anti-AI-slop design skill: makes generated UIs look made, not generated. One default design flow plus `audit` / `redesign` / `study` verbs, 20-theme catalog, 21 macrostructures, 58-gate slop test. Multi-file (108 files incl. the 24-theme OKLCH `tokens.css`; MIT). | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
+| **browser-harness** | Drives a real Chrome directly over CDP: coordinate clicks, screenshots, Python helpers, no selector hunting. **Needs the `browser-harness` CLI installed per machine** (see below); the markdown alone is inert. | [browser-use/browser-harness](https://github.com/browser-use/browser-harness) |
 
 
 `wayfinder` is the one skill here with dependencies: it resolves each ticket type by
@@ -38,6 +39,25 @@ tracker's "Wayfinding operations" doc) is not installed — so wayfinder falls b
 local-markdown tracker, whose operations ship as `skills/wayfinder/issue-tracker-local.md`.
 Point it at a real tracker by writing that section yourself and referencing it from the
 project's `CLAUDE.md`.
+
+`browser-harness` is the only skill here that is **not self-contained**. Its SKILL.md
+drives a `browser-harness` CLI that this hook does not install, so the skill is inert
+until you run the one-time install on a machine that has a real Chrome to attach to:
+
+```bash
+uv tool install --python 3.12 --upgrade --force browser-harness
+browser-harness <<'PY'
+print(page_info())
+PY
+```
+
+That is a local-machine step. Web sessions have no logged-in Chrome to drive, so the
+synced markdown just sits there unused — harmless, but don't expect it to work there.
+Upstream generates the skill body with `browser-harness skill`, which prints the copy
+packaged into the installed CLI; `skills/browser-harness/SKILL.md` is that same file
+vendored from the repo, so re-vendor it when you upgrade the CLI. Note its trigger is
+deliberately broad ("always use browser-harness for any web interaction"), and the tool
+executes Python against your real logged-in browser session.
 
 ## How it works
 
