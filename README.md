@@ -20,10 +20,44 @@ hook/settings.json      # the settings snippet that registers the hook
 | **ponytail** | Laziest solution that actually works (YAGNI, stdlib first, shortest diff). | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | **caveman** | Ultra-compressed terse output to cut tokens, technical accuracy intact. | [JuliusBrussee/caveman](https://github.com/juliusbrussee/caveman) |
 | **handoff** | Compresses & summarizes the conversation into a paste-ready HANDOFF.md to resume in another chat. | custom (this repo) |
-| **grilling** | Interviews you relentlessly about a plan or design, one question at a time, to stress-test it before you build. | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **grilling** | Interviews you relentlessly about a plan, decision, or idea to stress-test it before you build. Walks the design tree in rounds, asking the whole unblocked frontier at once and dispatching sub-agents for any fact it could look up itself. Also the default ticket type of `wayfinder`. | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | **goal** | Long-running goal continuation: give an objective and it auto-advances round by round (via `/loop`) until a completion audit passes. Multi-file; depends on the `/loop` skill. Chinese-language. | [limin112/claude-goal-skill](https://github.com/limin112/claude-goal-skill) |
+| **wayfinder** | Multi-session "fog of war" planning: charts work too big for one session as a map of decision tickets on the issue tracker, then resolves them one at a time. User-invoked only (`/wayfinder`). Ships with the three skills it calls (below). | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **domain-modeling** | Actively sharpens a project's domain model: challenges fuzzy terms, keeps `CONTEXT.md` as a pure glossary, writes ADRs sparingly. Wayfinder's default ticket type calls it alongside `grilling`. | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **research** | Delegates reading legwork to a background agent, against primary sources only, and captures the findings as a cited Markdown file. Resolves wayfinder's `research` tickets. | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **prototype** | Builds throwaway code that answers a design question: a single-file HTML state-machine demo, or several switchable UI variations on one route. Resolves wayfinder's `prototype` tickets. | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | **impeccable** | Frontend design language: 23 `/impeccable` commands (craft, shape, audit, critique, polish, animate, …) with per-command references, design detectors, and anti-slop rules. Multi-file (108 files, Apache 2.0). | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
 | **hallmark** | Anti-AI-slop design skill: makes generated UIs look made, not generated. One default design flow plus `audit` / `redesign` / `study` verbs, 20-theme catalog, 21 macrostructures, 58-gate slop test. Multi-file (108 files incl. the 24-theme OKLCH `tokens.css`; MIT). | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
+| **browser-harness** | Drives a real Chrome directly over CDP: coordinate clicks, screenshots, Python helpers, no selector hunting. **Needs the `browser-harness` CLI installed per machine** (see below); the markdown alone is inert. | [browser-use/browser-harness](https://github.com/browser-use/browser-harness) |
+
+
+`wayfinder` is the one skill here with dependencies: it resolves each ticket type by
+calling the Skill tool for `grilling`, `domain-modeling`, `research` or `prototype`, so
+those travel with it. Two things it expects are deliberately *not* bundled: the map lives
+on the repo's issue tracker, and upstream's `/setup-matt-pocock-skills` (which writes the
+tracker's "Wayfinding operations" doc) is not installed — so wayfinder falls back to the
+local-markdown tracker, whose operations ship as `skills/wayfinder/issue-tracker-local.md`.
+Point it at a real tracker by writing that section yourself and referencing it from the
+project's `CLAUDE.md`.
+
+`browser-harness` is the only skill here that is **not self-contained**. Its SKILL.md
+drives a `browser-harness` CLI that this hook does not install, so the skill is inert
+until you run the one-time install on a machine that has a real Chrome to attach to:
+
+```bash
+uv tool install --python 3.12 --upgrade --force browser-harness
+browser-harness <<'PY'
+print(page_info())
+PY
+```
+
+That is a local-machine step. Web sessions have no logged-in Chrome to drive, so the
+synced markdown just sits there unused — harmless, but don't expect it to work there.
+Upstream generates the skill body with `browser-harness skill`, which prints the copy
+packaged into the installed CLI; `skills/browser-harness/SKILL.md` is that same file
+vendored from the repo, so re-vendor it when you upgrade the CLI. Note its trigger is
+deliberately broad ("always use browser-harness for any web interaction"), and the tool
+executes Python against your real logged-in browser session.
 
 ## How it works
 
