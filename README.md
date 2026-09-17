@@ -10,7 +10,7 @@ on its next Claude Code on the web session.
 manifest.txt            # list of skill files to sync (one path per line, relative to skills/)
 skills/<name>/SKILL.md  # the skills themselves
 hook/sync-skills.sh     # the sync hook to drop into any project
-hook/settings.json      # the settings snippet that registers the hook
+hook/settings.json      # the settings snippet: registers the hook + the plugins below
 ```
 
 ## Skills
@@ -59,6 +59,33 @@ vendored from the repo, so re-vendor it when you upgrade the CLI. Note its trigg
 deliberately broad ("always use browser-harness for any web interaction"), and the tool
 executes Python against your real logged-in browser session.
 
+## Plugins
+
+Skills ride `manifest.txt` into `~/.claude/skills`. **Plugins don't** — they are declared
+in settings and Claude Code installs them itself from their marketplace. `hook/settings.json`
+carries both, so the wire snippet below gives a project the skills *and* the plugins.
+
+| Plugin | What it does | Upstream |
+|--------|--------------|----------|
+| **open-code-review** | Two slash commands driving Alibaba's `ocr` review CLI: `/review` (OCR reviews with its own LLM, Claude filters the comments and applies the fixes) and `/delegate-review` (OCR picks the files and supplies the rules, Claude does the reviewing). | [alibaba/open-code-review](https://github.com/alibaba/open-code-review) (Apache 2.0) |
+
+The plugin is *only* those two command files — the actual work is the `ocr` CLI, which it
+does not bundle. Both commands install it on first use (`npm i -g @alibaba-group/open-code-review`),
+so a fresh web session pays that install once, the first time you run one.
+
+From there the two commands need different things:
+
+- `/delegate-review` — **works as-is, no API key.** OCR only selects the files and hands
+  over its review rules; the review itself runs on Claude's own model.
+- `/review` — needs an LLM provider configured for OCR itself (`ocr config provider`;
+  Anthropic, OpenAI or Bedrock protocols, also settable from the environment). That config
+  is written on the machine, so it does not survive a web container. Treat `/review` as
+  local-only unless you push the provider settings into the web environment yourself.
+
+Upstream also ships a standalone `open-code-review` skill, but it lives outside the Claude
+Code plugin (it targets Codex/Cursor) and covers the same ground as `/delegate-review`, so
+it is deliberately not in `manifest.txt`.
+
 ## How it works
 
 - **This repo must stay PUBLIC.** The hook fetches it with no auth. Primary transport is
@@ -94,7 +121,7 @@ curl -sSL https://raw.githubusercontent.com/edgardoperrelli-maker/claude-skills/
 chmod +x .claude/hooks/sync-skills.sh
 ```
 
-Then add this SessionStart entry to `.claude/settings.json`. The hook is named
+Then merge this into `.claude/settings.json`. The hook is named
 `sync-skills.sh` (not `session-start.sh`) so it never clashes with a project's
 own startup hook — if `.claude/settings.json` already has a `SessionStart` array,
 just append this object as an extra element instead of replacing it:
@@ -105,9 +132,22 @@ just append this object as an extra element instead of replacing it:
     "SessionStart": [
       { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sync-skills.sh" } ] }
     ]
+  },
+  "extraKnownMarketplaces": {
+    "open-code-review": {
+      "source": { "source": "github", "repo": "alibaba/open-code-review" }
+    }
+  },
+  "enabledPlugins": {
+    "open-code-review@open-code-review": true
   }
 }
 ```
+
+`extraKnownMarketplaces` + `enabledPlugins` are what replace typing `/plugin marketplace add`
+and `/plugin install` in every project: Claude Code registers the marketplace and enables the
+plugin on its own once the folder is trusted. Both keys take effect at **startup**, so a
+project that just got them picks the plugin up on its next session, not the current one.
 
 ## Local setup (once per machine)
 
@@ -123,3 +163,9 @@ done
 ```
 
 Re-run to pull the latest. Restart Claude Code to load newly added skills.
+
+For the plugins, the per-project block above is only worth it in web sessions. Locally,
+put the same `extraKnownMarketplaces` + `enabledPlugins` keys in `~/.claude/settings.json`
+once and every project on the machine gets them — which is also the one place where
+`/plugin marketplace add alibaba/open-code-review` and
+`/plugin install open-code-review@open-code-review` do the same job by hand.
