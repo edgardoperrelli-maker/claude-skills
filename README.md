@@ -118,8 +118,14 @@ Copy the hook into the project's repo and register it:
 ```bash
 mkdir -p .claude/hooks
 curl -sSL https://raw.githubusercontent.com/edgardoperrelli-maker/claude-skills/main/hook/sync-skills.sh -o .claude/hooks/sync-skills.sh
-chmod +x .claude/hooks/sync-skills.sh
 ```
+
+No `chmod +x`: the settings entry below invokes the hook as an argument to `bash`,
+so the file never needs the executable bit. That is deliberate — a copy landing
+without it is the normal case, not the exception. `curl -o` clears it, and a file
+committed through the GitHub contents API is always mode `100644`, because that
+API has no way to set the bit. Under the old `chmod +x` wiring both of those
+produce a hook that dies with *permission denied* at session start.
 
 Then merge this into `.claude/settings.json`. The hook is named
 `sync-skills.sh` (not `session-start.sh`) so it never clashes with a project's
@@ -130,7 +136,7 @@ just append this object as an extra element instead of replacing it:
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sync-skills.sh" } ] }
+      { "hooks": [ { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sync-skills.sh\"" } ] }
     ]
   },
   "extraKnownMarketplaces": {
@@ -143,6 +149,10 @@ just append this object as an extra element instead of replacing it:
   }
 }
 ```
+
+Projects wired before this used `"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sync-skills.sh"`
+and relied on `chmod +x`. Those keep working — their hook file does carry the bit — so there is
+nothing to migrate. Use the `bash` form for anything wired from here on.
 
 `extraKnownMarketplaces` + `enabledPlugins` are what replace typing `/plugin marketplace add`
 and `/plugin install` in every project: Claude Code registers the marketplace and enables the
